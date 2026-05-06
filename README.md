@@ -1,8 +1,8 @@
-# 🤖 Auto Bidding Bot (LinkedIn & X)
+#  Auto Bidding Bot (LinkedIn & X)
 
 An intelligent, automated system designed to detect job opportunities on LinkedIn and X (Twitter) and automatically post personalized, AI-generated bids. This project combines the orchestration power of **n8n** with the browser automation capabilities of **Playwright** and the speed of **Groq AI**.
 
-## 🚀 Key Features
+##  Key Features
 - **Multi-Platform Support**: Scrapes and posts on both LinkedIn and X.
 - **AI-Powered Bidding**: Generates unique, 3-4 sentence human-like bids using Groq (Llama 3).
 - **Smart Scheduling**: Operates only during business hours to simulate human activity.
@@ -10,7 +10,7 @@ An intelligent, automated system designed to detect job opportunities on LinkedI
 - **Deduplication**: Uses a SQLite database to ensure no post is ever replied to twice.
 - **Stealth Mode**: Uses persistent browser sessions and random delays to minimize ban risk.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 - **Orchestration**: n8n
 - **Browser Automation**: Python + Playwright
 - **AI Generation**: Groq API (Llama 3)
@@ -18,7 +18,7 @@ An intelligent, automated system designed to detect job opportunities on LinkedI
 - **Backend API**: FastAPI
 - **Frontend Dashboard**: React (Vite)
 
-## 🏗️ Architecture & Workflow
+##  Architecture & Workflow
 
 The system follows a modular architecture where **n8n** acts as the brain, managing the logic flow, while the **Python Backend** acts as the hands, performing the actual web interactions.
 
@@ -57,22 +57,19 @@ The system follows a modular architecture where **n8n** acts as the brain, manag
 - **Post Reply**: Calls the Python Playwright script to navigate to the URL and type out the comment.
 - **Save to DB**: Records the successful bid in SQLite to prevent future duplicates.
 
-## 🖥️ Dashboard & Personalization
+##  Dashboard & Personalization
 
-The project includes a premium **React-based Dashboard** (built with Vite) that serves as the central control hub for the automation.
+The project includes a **React-based Dashboard** that serves as the central control hub for the automation.
 
-### Design & Aesthetics
-- **Modern UI**: Designed with a sleek, dark-mode aesthetic using a custom HSL-based color palette (deep charcoals and vibrant accent colors).
-- **Premium UX**: Features glassmorphism effects, smooth CSS transitions, and a responsive layout that works across all screen sizes.
-- **Dynamic Feedback**: Includes real-time toast notifications and loading states to provide immediate feedback on bot triggers and configuration saves.
 
 ### Integration & Personalization
 - **Persona Management**: You can define your professional title, years of experience, and a specific "tone of voice." This data is synchronized with `persona.json` on the backend.
 - **Workflow Synergy**: When n8n triggers a bid, it first fetches this persona data. This ensures the AI (Groq) generates comments that sound like *you*, mentioning your specific tech stack and matching your preferred professional tone.
 - **Search Configuration**: Allows real-time updates to search keywords, which are immediately used by the Playwright scrapers in the next cycle.
+- **Dynamic Feedback**: Includes real-time toast notifications and loading states to provide immediate feedback on bot triggers and configuration saves.
 - **Live Activity Log**: Monitors the SQLite `bids.db` to show a live feed of all successful bids, complete with direct links to the social media posts.
 
-## 📁 Project Structure
+##  Project Structure
 ```text
 ├── workflow/                  # n8n Workflow JSON export
 ├── backend/
@@ -88,36 +85,13 @@ The project includes a premium **React-based Dashboard** (built with Vite) that 
 └── docker-compose.yml         # Orchestration for n8n & Backend
 ```
 
-## ⚙️ Setup & Installation
+##  Setup & Installation
 
-### 1. Prerequisites
+### Prerequisites
 - Docker & Docker Compose
 - Python 3.10+
 - Groq API Key
 
-### 2. Initial Authentication (CRITICAL)
-
-Since LinkedIn and X have strict bot detection, you must perform the first-time login manually to save your session cookies.
-
-1.  **Toggle Headless Mode**: Open `backend/scraper_x.py` and `backend/scraper_linkedin.py`. Ensure the `headless` parameter is set to `False` in the browser launch section:
-    ```python
-    # In scraper_x.py or scraper_linkedin.py
-    browser = p.chromium.launch_persistent_context(
-        user_data_dir=PROFILE_PATH,
-        headless=False,  # Set to False to see the window and log in
-        # ...
-    )
-    ```
-2.  **Run Standalone**: Execute the scripts individually from your terminal:
-    ```bash
-    python backend/scraper_x.py
-    python backend/scraper_linkedin.py
-    ```
-3.  **Manual Login**: A browser window will open. Manually log in to your accounts and complete any 2FA/Captchas. 
-4.  **Save Session**: Close the browser window once you are logged in. The session data is now saved in the `browser_profile_*` folders.
-5.  **Go Headless**: You can now set `headless=True` in the scripts for background operation.
-
-## ⚙️ Setup & Installation
 
 Follow these steps to get the entire system running on your local machine.
 
@@ -187,11 +161,10 @@ Before the bot can run automatically, you must log in manually to LinkedIn and X
 3.  **Configure Groq**: In the "Groq" node, add your API key.
 4.  **Configure Webhook**: Copy your n8n Production Webhook URL and paste it into the **Settings** page of the React Dashboard.
 
-## 🛡️ Risk Mitigation (Anti-Ban)
+##  Risk Mitigation (Anti-Ban)
 - **Session Reuse**: We use `launch_persistent_context` so we never have to log in repeatedly.
 - **Human Typing**: Playwright types the AI-generated comment character-by-character with slight delays.
 - **Randomized Delays**: n8n introduces variable wait times between actions.
 - **Low Volume**: We stay well below the aggressive detection thresholds of both platforms.
 
 ---
-*Developed as part of the Auto Bidding Bot Assignment.*
