@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: autobidder-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      # Ensure Execute Command node is explicitly allowed (though we won't strictly need it now)
+      - N8N_DISABLE_EXECUTE_COMMAND=false
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # Mount the current directory so SQLite databases can be saved here
+      - .:/app
+
+volumes:
+  n8n_data:
