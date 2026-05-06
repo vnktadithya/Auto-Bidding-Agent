@@ -1,0 +1,34 @@
+# --- Python / Backend ---
+__pycache__/
+.venv/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Node / Frontend ---
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.env
+frontend/.env.local
+
+# --- App Specific Data (Sensitive/Local) ---
+backend/bids.db
+backend/browser_profile_x/
+backend/browser_profile_linkedin/
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- System ---
+Thumbs.db
+desktop.ini
