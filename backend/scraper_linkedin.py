@@ -67,7 +67,11 @@ def get_latest_linkedin_posts():
                     
                     if urn:
                         full_url = f"https://www.linkedin.com/feed/update/{urn}/"
-                        scraped_posts.append({"url": full_url, "text": text})
+                        scraped_posts.append({
+                            "url": full_url, 
+                            "text": text,
+                            "platform": "linkedin"
+                        })
                 except Exception:
                     continue
         except Exception as e:
@@ -83,7 +87,7 @@ def post_linkedin_reply(post_url, reply_text):
         logger.info(f"Launching browser to reply to: {post_url}")
         browser = p.chromium.launch_persistent_context(
             user_data_dir=PROFILE_PATH,
-            headless=False, 
+            headless=True, 
             args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-setuid-sandbox"],
             slow_mo=500 
         )
@@ -92,16 +96,23 @@ def post_linkedin_reply(post_url, reply_text):
         
         try:
             # LinkedIn uses a Quill editor for comments
-            reply_box = page.locator('.comments-comment-box-comment__text-editor .ql-editor')
-            reply_box.wait_for(state="visible", timeout=15000)
+            # We use a more generic selector and click first to focus
+            reply_box = page.locator('.ql-editor[contenteditable="true"]').first
+            reply_box.wait_for(state="visible", timeout=20000)
             
-            logger.info("Typing reply...")
-            reply_box.fill(reply_text)
+            logger.info("Focusing comment box...")
+            reply_box.click()
             page.wait_for_timeout(1000)
             
+            logger.info("Typing reply character-by-character...")
+            reply_box.press_sequentially(reply_text, delay=70)
+            page.wait_for_timeout(2000)
+            
             reply_button = page.locator('.comments-comment-box__submit-button')
+            logger.info("Clicking the post button...")
             reply_button.click()
-            logger.info("Comment posted successfully.")
+            # page.pause()
+            logger.info("Comment posted successfully!")
             
             page.wait_for_timeout(3000)
         except Exception as e:

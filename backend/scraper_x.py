@@ -23,7 +23,7 @@ def get_latest_posts():
         logger.info("Launching browser for X scraping...")
         browser = p.chromium.launch_persistent_context(
             user_data_dir=PROFILE_PATH,
-            headless=False, 
+            headless=True, 
             args=["--disable-blink-features=AutomationControlled"],
             slow_mo=500 
         )
@@ -58,7 +58,11 @@ def get_latest_posts():
                     post_url_rel = tweet.locator("time").locator("..").get_attribute("href")
                     full_url = "https://x.com" + post_url_rel
                     
-                    scraped_posts.append({"url": full_url, "text": text})
+                    scraped_posts.append({
+                        "url": full_url, 
+                        "text": text,
+                        "platform": "x"
+                    })
                 except Exception:
                     continue # Skip ads or malformed tweets
         except Exception as e:
@@ -86,13 +90,15 @@ def post_reply(post_url, reply_text):
             reply_box = page.locator('[data-testid="tweetTextarea_0"]')
             reply_box.wait_for(state="visible", timeout=15000)
             
-            logger.info("Typing reply...")
-            reply_box.fill(reply_text)
-            page.wait_for_timeout(1000)
+            logger.info("Typing reply character-by-character...")
+            reply_box.press_sequentially(reply_text, delay=100)
+            page.wait_for_timeout(2000)
             
             reply_button = page.locator('[data-testid="tweetButtonInline"]')
-            reply_button.click() 
-            logger.info("Reply posted successfully.")
+            logger.info("Clicking the post button...")
+            reply_button.click()
+            # page.pause()
+            logger.info("Reply posted successfully!")
             
             page.wait_for_timeout(3000)
         except Exception as e:
