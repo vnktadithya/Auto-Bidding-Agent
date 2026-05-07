@@ -54,7 +54,8 @@ function Activity({ apiBase, showToast }) {
 
   const formatTimestamp = (ts) => {
     if (!ts) return '—'
-    const date = new Date(ts)
+    // SQLite CURRENT_TIMESTAMP is UTC. We append ' UTC' to ensure JS treats it as such.
+    const date = new Date(ts.includes('Z') || ts.includes('+') ? ts : ts + ' UTC')
     return date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
