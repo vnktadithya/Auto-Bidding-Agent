@@ -144,16 +144,15 @@ We use Docker to run n8n, which orchestrates the entire workflow.
 2.  **Access n8n**: Open your browser and go to `http://localhost:5678`.
 
 ### 4. Initial Authentication (CRITICAL)
-Before the bot can run automatically, you must log in manually to LinkedIn and X once.
+Before the bot can run automatically, you must log in manually to LinkedIn and X once to save your session cookies.
 
 1.  **Toggle Headless Mode**: Open `backend/scraper_x.py` and `backend/scraper_linkedin.py`. Set `headless=False`.
-2.  **Run Standalone**:
-    ```bash
-    python backend/scraper_x.py
-    python backend/scraper_linkedin.py
-    ```
-3.  **Login**: Log in manually in the browser windows that appear.
-4.  **Go Headless**: Close the windows and set `headless=True` in the scripts.
+2.  **Run Standalone for Login**:
+    -   Run the scripts manually.
+    -   **IMPORTANT**: On the first run, if the browser opens to a search page and you aren't logged in, simply navigate to `linkedin.com` or `x.com` in that same window.
+3.  **Manual Login**: Perform your login (and 2FA if enabled) manually.
+4.  **Save Session**: Once you see your feed, close the browser window. The session data is now securely saved in the `browser_profile_*` folders.
+5.  **Go Headless**: Set `headless=True` back in the scripts for fully automated background operation.
 
 ### 5. Importing the Workflow
 1.  In n8n, click the **menu (three dots)** -> **Import from File**.
