@@ -7,9 +7,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-import scraper_x
-import scraper_linkedin
-import db
+from . import scraper_x
+from . import scraper_linkedin
+from . import db
+
+# Resolve paths relative to this script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PERSONA_PATH = os.path.join(BASE_DIR, 'persona.json')
+KEYWORDS_PATH = os.path.join(BASE_DIR, 'keywords.json')
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -118,11 +123,11 @@ def get_config():
     """Returns current persona and keywords configuration."""
     persona, keywords, webhook_url = {}, {}, ""
     try:
-        if os.path.exists('persona.json'):
-            with open('persona.json', 'r') as f:
+        if os.path.exists(PERSONA_PATH):
+            with open(PERSONA_PATH, 'r') as f:
                 persona = json.load(f)
-        if os.path.exists('keywords.json'):
-            with open('keywords.json', 'r') as f:
+        if os.path.exists(KEYWORDS_PATH):
+            with open(KEYWORDS_PATH, 'r') as f:
                 data = json.load(f)
                 keywords = data
                 webhook_url = data.get('webhook_url', "")
@@ -136,12 +141,12 @@ def get_config():
 def save_config(payload: ConfigPayload):
     """Saves persona and keywords configuration."""
     try:
-        with open('persona.json', 'w') as f:
+        with open(PERSONA_PATH, 'w') as f:
             json.dump(payload.persona, f, indent=2)
         
         kw_data = payload.keywords
         kw_data['webhook_url'] = payload.webhook_url
-        with open('keywords.json', 'w') as f:
+        with open(KEYWORDS_PATH, 'w') as f:
             json.dump(kw_data, f, indent=2)
             
         return {"status": "success", "message": "Configuration saved"}
@@ -154,8 +159,8 @@ def trigger_workflow():
     """Triggers the n8n workflow webhook."""
     try:
         webhook_url = ""
-        if os.path.exists('keywords.json'):
-            with open('keywords.json', 'r') as f:
+        if os.path.exists(KEYWORDS_PATH):
+            with open(KEYWORDS_PATH, 'r') as f:
                 data = json.load(f)
                 webhook_url = data.get('webhook_url', "").strip()
         

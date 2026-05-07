@@ -2,7 +2,13 @@ import sqlite3
 import os
 from datetime import datetime
 
-DB_PATH = 'bids.db'
+# Resolve path to ensure database stays inside the backend folder
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'bids.db')
+
+# Ensure the backend directory exists (extra safety)
+if not os.path.exists(BASE_DIR):
+    os.makedirs(BASE_DIR, exist_ok=True)
 
 def get_db_connection():
     """Returns a connection to the SQLite database."""

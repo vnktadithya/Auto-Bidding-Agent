@@ -8,8 +8,12 @@ from playwright.sync_api import sync_playwright
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ScraperX")
 
+# Resolve paths relative to this script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+KEYWORDS_PATH = os.path.join(BASE_DIR, 'keywords.json')
+PROFILE_PATH = os.path.join(BASE_DIR, 'browser_profile_x')
+
 DEFAULT_KEYWORDS = ["looking for developer", "looking for freelancer"]
-PROFILE_PATH = "./browser_profile_x"
 
 def get_latest_posts():
     """Scrapes the latest job-related posts from X (Twitter)."""
@@ -29,8 +33,8 @@ def get_latest_posts():
         # Load keywords
         keywords = DEFAULT_KEYWORDS
         try:
-            if os.path.exists('keywords.json'):
-                with open('keywords.json', 'r') as f:
+            if os.path.exists(KEYWORDS_PATH):
+                with open(KEYWORDS_PATH, 'r') as f:
                     kw_data = json.load(f)
                     keywords = kw_data.get('keywords', DEFAULT_KEYWORDS)
         except Exception as e:

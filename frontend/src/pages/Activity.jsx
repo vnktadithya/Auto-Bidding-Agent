@@ -88,12 +88,12 @@ function Activity({ apiBase, showToast }) {
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           <div>
             <h2>📋 Activity Log</h2>
-            <p>Track all automated bids posted by the bot. Auto-refreshes every 30 seconds.</p>
+            <p>Track all automated bids posted by the bot.</p>
           </div>
-          
-          <button 
-            className={`btn btn-primary ${triggering ? 'loading' : ''}`} 
-            onClick={handleTrigger} 
+
+          <button
+            className={`btn btn-primary ${triggering ? 'loading' : ''}`}
+            onClick={handleTrigger}
             disabled={triggering}
             style={{ padding: '10px 16px', fontSize: '0.9rem' }}
           >
@@ -107,21 +107,21 @@ function Activity({ apiBase, showToast }) {
             )}
           </button>
         </div>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '8px', 
-          padding: '8px 12px', 
-          background: isBusinessHours ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 165, 2, 0.1)', 
-          border: `1px solid ${isBusinessHours ? 'rgba(46, 213, 115, 0.2)' : 'rgba(255, 165, 2, 0.2)'}`, 
-          borderRadius: '8px' 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 12px',
+          background: isBusinessHours ? 'rgba(46, 213, 115, 0.1)' : 'rgba(255, 165, 2, 0.1)',
+          border: `1px solid ${isBusinessHours ? 'rgba(46, 213, 115, 0.2)' : 'rgba(255, 165, 2, 0.2)'}`,
+          borderRadius: '8px'
         }}>
-          <div style={{ 
-            width: '8px', 
-            height: '8px', 
-            borderRadius: '50%', 
-            backgroundColor: isBusinessHours ? '#2ed573' : '#ffa502', 
-            boxShadow: `0 0 8px ${isBusinessHours ? '#2ed573' : '#ffa502'}` 
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: isBusinessHours ? '#2ed573' : '#ffa502',
+            boxShadow: `0 0 8px ${isBusinessHours ? '#2ed573' : '#ffa502'}`
           }}></div>
           <span style={{ fontSize: '0.9rem', color: 'var(--text-color)', fontWeight: '500' }}>
             {isBusinessHours ? 'Business Hours: Active' : 'Outside Hours: Sleeping'}
