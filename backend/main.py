@@ -137,6 +137,18 @@ def get_config():
     
     return {"persona": persona, "keywords": keywords, "webhook_url": webhook_url}
 
+@app.get("/persona")
+def get_persona():
+    """Returns ONLY the persona configuration."""
+    try:
+        if os.path.exists(PERSONA_PATH):
+            with open(PERSONA_PATH, 'r') as f:
+                return json.load(f)
+        return {}
+    except Exception as e:
+        logger.error(f"Persona read error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to load persona")
+
 @app.post("/config")
 def save_config(payload: ConfigPayload):
     """Saves persona and keywords configuration."""
