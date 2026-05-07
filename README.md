@@ -160,6 +160,26 @@ Before the bot can run automatically, you must log in manually to LinkedIn and X
 3.  **Configure Groq**: In the "Groq" node, add your API key.
 4.  **Configure Webhook**: Copy your n8n Production Webhook URL and paste it into the **Settings** page of the React Dashboard.
 
+##  Testing & Manual Verification
+
+If you want to verify the automation logic without waiting for the n8n schedule, you can run the standalone test scripts. These will scrape the latest posts and simulate a full reply workflow using a mock bid.
+
+### 1. Run Standalone Tests
+From the root directory, run:
+```bash
+# For LinkedIn
+python test_linkedin_full_workflow.py
+
+# For X (Twitter)
+python test_x_full_workflow.py
+```
+
+### 2. Inspecting Actions (Visual Mode)
+To see exactly how the bot interacts with the browser:
+1.  **Disable Headless Mode**: In `backend/scraper_linkedin.py` or `backend/scraper_x.py`, set `headless=False`.
+2.  **Enable Debug Pause**: To stop the bot before it clicks "Post", you can uncomment `# page.pause()` in the `post_reply` functions. This will open the Playwright Inspector and let you step through every action manually.
+3.  **Dry Run**: To prevent the bot from actually posting during a test, ensure the `reply_button.click()` line is commented out.
+
 ##  Risk Mitigation (Anti-Ban)
 - **Session Reuse**: We use `launch_persistent_context` so we never have to log in repeatedly.
 - **Human Typing**: Playwright types the AI-generated comment character-by-character with slight delays.
