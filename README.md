@@ -20,7 +20,7 @@ An intelligent, automated system designed to detect job opportunities on LinkedI
 
 ##  Architecture & Workflow
 
-The system follows a modular architecture where **n8n** acts as the brain, managing the logic flow, while the **Python Backend** acts as the hands, performing the actual web interactions.
+The system follows a modular architecture where **n8n** manages the logic flow, while the **Python Backend** performs the actual web interactions.
 
 ### Visual Workflow Breakdown
 
