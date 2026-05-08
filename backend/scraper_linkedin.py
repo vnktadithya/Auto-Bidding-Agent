@@ -18,12 +18,13 @@ DEFAULT_KEYWORDS = ["looking for developer", "looking for freelancer"]
 def get_latest_linkedin_posts():
     """Scrapes the latest job-related posts from LinkedIn."""
     scraped_posts = []
-    
+    is_headless = True
+
     with sync_playwright() as p:
         logger.info("Launching browser for LinkedIn scraping...")
         browser = p.chromium.launch_persistent_context(
             user_data_dir=PROFILE_PATH,
-            headless=True, 
+            headless=is_headless, 
             args=[
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",          

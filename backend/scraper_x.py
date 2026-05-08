@@ -18,12 +18,13 @@ DEFAULT_KEYWORDS = ["looking for developer", "looking for freelancer"]
 def get_latest_posts():
     """Scrapes the latest job-related posts from X (Twitter)."""
     scraped_posts = []
+    is_headless = True
     
     with sync_playwright() as p:
         logger.info("Launching browser for X scraping...")
         browser = p.chromium.launch_persistent_context(
             user_data_dir=PROFILE_PATH,
-            headless=True, 
+            headless=is_headless, 
             args=["--disable-blink-features=AutomationControlled"],
             slow_mo=500 
         )
@@ -76,9 +77,11 @@ def post_reply(post_url, reply_text):
     """Automates posting a reply to a specific X post with verification."""
     with sync_playwright() as p:
         logger.info(f"Launching browser to reply to: {post_url}")
+        is_headless = True
+
         browser = p.chromium.launch_persistent_context(
             user_data_dir=PROFILE_PATH,
-            headless=True, 
+            headless=is_headless, 
             args=["--disable-blink-features=AutomationControlled"],
             slow_mo=500
         )

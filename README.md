@@ -157,7 +157,7 @@ Before the bot can run automatically, you must log in manually to LinkedIn and X
 ### 5. Importing the Workflow
 1.  In n8n, click the **menu (three dots)** -> **Import from File**.
 2.  Select `workflow/autobidder_workflow.json`.
-3.  **Configure Groq**: In the "Groq" node, add your API key.
+3.  **Configure Groq**: In the "Groq" node, replace the placeholder `[GROQ_API_KEY]` in the Header parameters with your actual Groq API key.
 4.  **Configure Webhook**: Copy your n8n Production Webhook URL and paste it into the **Settings** page of the React Dashboard.
 
 ##  Testing & Manual Verification
