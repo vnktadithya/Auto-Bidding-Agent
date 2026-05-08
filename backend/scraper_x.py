@@ -73,12 +73,12 @@ def get_latest_posts():
     return scraped_posts
 
 def post_reply(post_url, reply_text):
-    """Automates posting a reply to a specific X post."""
+    """Automates posting a reply to a specific X post with verification."""
     with sync_playwright() as p:
         logger.info(f"Launching browser to reply to: {post_url}")
         browser = p.chromium.launch_persistent_context(
             user_data_dir=PROFILE_PATH,
-            headless=False, 
+            headless=True, 
             args=["--disable-blink-features=AutomationControlled"],
             slow_mo=500
         )
@@ -86,23 +86,56 @@ def post_reply(post_url, reply_text):
         page.goto(post_url)
         
         try:
-            # Wait for reply box
-            reply_box = page.locator('[data-testid="tweetTextarea_0"]')
-            reply_box.wait_for(state="visible", timeout=15000)
+            # 1. Wait for reply box
+            # X uses a div with data-testid="tweetTextarea_0"
+            reply_box_selector = '[data-testid="tweetTextarea_0"]'
+            reply_box = page.locator(reply_box_selector).first
             
-            logger.info("Typing reply character-by-character...")
-            reply_box.press_sequentially(reply_text, delay=100)
+            logger.info("Waiting for X reply box...")
+            reply_box.wait_for(state="visible", timeout=30000)
+            
+            # 2. Focus and Type
+            logger.info("Focusing and typing X reply...")
+            reply_box.click()
+            page.wait_for_timeout(1000)
+            
+            # Use keyboard typing to trigger UI state changes
+            reply_box.press_sequentially(reply_text, delay=50)
             page.wait_for_timeout(2000)
             
-            reply_button = page.locator('[data-testid="tweetButtonInline"]')
-            logger.info("Clicking the post button...")
-            reply_button.click()
-            # page.pause()
-            logger.info("Reply posted successfully!")
+            # 3. Locate and Verify Reply Button
+            button_selector = '[data-testid="tweetButtonInline"]'
+            reply_button = page.locator(button_selector).first
             
-            page.wait_for_timeout(3000)
+            reply_button.wait_for(state="visible", timeout=10000)
+            
+            if reply_button.is_disabled():
+                logger.error("X Reply button is disabled after typing.")
+                raise Exception("X Reply button remained disabled.")
+
+            # 4. Click and Verify
+            logger.info("Clicking the X reply button...")
+            reply_button.click()
+            
+            # Verification: On X, the reply box usually collapses or clears,
+            # and a "Your reply was sent" toast may appear.
+            logger.info("Verifying X reply submission...")
+            try:
+                # Expect the button to disappear (as the box collapses)
+                reply_button.wait_for(state="hidden", timeout=10000)
+                logger.info("Reply button is gone, X reply likely sent.")
+            except Exception:
+                # Fallback: check if the text is still in the box
+                current_text = reply_box.inner_text().strip()
+                if current_text != "":
+                    logger.error("X reply text still present in box after click.")
+                    raise Exception("X reply failed to submit (text still present)")
+
+            logger.info("X reply posted and verified successfully!")
+            page.wait_for_timeout(2000)
+            
         except Exception as e:
-            logger.error(f"Failed to post reply: {e}")
+            logger.error(f"Failed to post X reply: {e}")
             raise
         finally:
             browser.close()

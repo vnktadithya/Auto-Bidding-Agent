@@ -23,7 +23,7 @@ def get_latest_linkedin_posts():
         logger.info("Launching browser for LinkedIn scraping...")
         browser = p.chromium.launch_persistent_context(
             user_data_dir=PROFILE_PATH,
-            headless=False, 
+            headless=True, 
             args=[
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",          
@@ -82,39 +82,108 @@ def get_latest_linkedin_posts():
     return scraped_posts
 
 def post_linkedin_reply(post_url, reply_text):
-    """Automates posting a reply to a specific LinkedIn post."""
+    """Automates posting a reply to a specific LinkedIn post with verification."""
+    # We set this to a variable so we can use it in error handling
+    is_headless = True 
+    
     with sync_playwright() as p:
         logger.info(f"Launching browser to reply to: {post_url}")
         browser = p.chromium.launch_persistent_context(
             user_data_dir=PROFILE_PATH,
-            headless=True, 
-            args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-setuid-sandbox"],
+            headless=is_headless, 
+            args=[
+                "--disable-blink-features=AutomationControlled", 
+                "--no-sandbox", 
+                "--disable-setuid-sandbox"
+            ],
             slow_mo=500 
         )
         page = browser.pages[0] 
         page.goto(post_url)
         
         try:
-            # LinkedIn uses a Quill editor for comments
-            # We use a more generic selector and click first to focus
-            reply_box = page.locator('.ql-editor[contenteditable="true"]').first
-            reply_box.wait_for(state="visible", timeout=20000)
+            # 1. Wait for the editor to be ready
+            editor_selector = '.ql-editor[contenteditable="true"]'
+            reply_box = page.locator(editor_selector).first
             
-            logger.info("Focusing comment box...")
+            logger.info("Waiting for comment editor...")
+            reply_box.wait_for(state="visible", timeout=30000)
+            
+            # 2. Focus and Type
+            logger.info("Focusing and typing reply...")
             reply_box.click()
             page.wait_for_timeout(1000)
             
-            logger.info("Typing reply character-by-character...")
-            reply_box.press_sequentially(reply_text, delay=70)
+            # Ensure the box is clear before typing
+            page.keyboard.press("Control+a")
+            page.keyboard.press("Backspace")
+            
+            # Use keyboard typing for better event triggering
+            page.keyboard.type(reply_text, delay=50)
             page.wait_for_timeout(2000)
             
-            reply_button = page.locator('.comments-comment-box__submit-button')
-            logger.info("Clicking the post button...")
-            reply_button.click()
-            # page.pause()
-            logger.info("Comment posted successfully!")
+            # 3. Locate and Verify Post/Comment Button
+            logger.info("Locating the Comment submission button...")
             
+            # Priority selectors: 
+            # 1. The specific LinkedIn submit class
+            # 2. A primary button with "Comment" text (as seen in your screenshot)
+            # 3. A button with "Post" text (fallback for other regions/views)
+            selectors = [
+                "button.comments-comment-box__submit-button",
+                "button.artdeco-button--primary:has-text('Comment')",
+                "button.artdeco-button--primary:has-text('Post')",
+                ".comments-comment-box__form-container button[type='submit']"
+            ]
+            
+            reply_button = None
+            for selector in selectors:
+                # We use a more specific search to ensure it's the one in the comment area
+                loc = page.locator(f".comments-comment-box {selector}").first
+                if loc.is_visible():
+                    reply_button = loc
+                    break
+            
+            if not reply_button:
+                logger.warning("Specific button not found in comment box, trying global primary buttons...")
+                # Avoid "Repost" by being explicit about the text
+                reply_button = page.locator('button.artdeco-button--primary:has-text("Comment"), button.artdeco-button--primary:has-text("Post")').first
+
+            reply_button.wait_for(state="visible", timeout=10000)
+            
+            # If button is still disabled, try a final "wake up" of the editor
+            if reply_button.is_disabled():
+                logger.warning("Post button is disabled. Re-triggering editor focus...")
+                reply_box.click()
+                page.keyboard.press("Space")
+                page.keyboard.press("Backspace")
+                page.wait_for_timeout(1000)
+                
+            if reply_button.is_disabled():
+                raise Exception("LinkedIn Post button remained disabled after typing.")
+
+            # 4. Attempt submission
+            logger.info("Attempting submission (Clicking button)...")
+            reply_button.click()
             page.wait_for_timeout(3000)
+            
+            # Verification: Check if text is still in the box
+            current_text = reply_box.inner_text().strip()
+            if current_text != "" and current_text != "Add a comment...":
+                logger.info("Box not cleared by click. Trying keyboard shortcut (Control+Enter)...")
+                reply_box.focus()
+                page.keyboard.press("Control+Enter")
+                page.wait_for_timeout(4000)
+
+            # Final Verification
+            current_text = reply_box.inner_text().strip()
+            # Success if: editor is hidden OR text is gone/placeholder
+            if not reply_box.is_visible() or current_text == "" or current_text == "Add a comment...":
+                logger.info("LinkedIn comment posted and verified successfully!")
+            else:
+                logger.error(f"Verification failed. Final text: '{current_text[:30]}...'")
+                raise Exception("Comment failed to submit after multiple attempts (Button & Shortcut).")
+            
         except Exception as e:
             logger.error(f"Failed to post LinkedIn reply: {e}")
             raise
